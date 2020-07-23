@@ -3,6 +3,7 @@ package host
 import (
 	"fmt"
 	"math/big"
+	"strings"
 	"testing"
 
 	"github.com/ElrondNetwork/arwen-wasm-vm/mock"
@@ -39,7 +40,7 @@ func TestDelegation_ManyNodes(t *testing.T) {
 
 	deployInput := DefaultTestContractCreateInput()
 	deployInput.VMInput.CallerAddr = delegation_owner.Address
-	deployInput.GasProvided = 1_000_000
+	deployInput.GasProvided = 999_000_000_000
 	deployInput.ContractCode = GetTestSCCode("delegation", "../../")
 	deployInput.Arguments = [][]byte{
 		auction_mock.Address,
@@ -48,7 +49,8 @@ func TestDelegation_ManyNodes(t *testing.T) {
 		{0x03, 0xE8}, // 1000
 	}
 
-	blockchainMock.NewAddr = []byte("delegation_contract_____________")
+	delegation_contract_address := []byte("delegation_contract_____________")
+	blockchainMock.NewAddr = delegation_contract_address
 	vmOutput, err := host.RunSmartContractCreate(deployInput)
 	require.Nil(t, err)
 	require.NotNil(t, vmOutput)
@@ -59,9 +61,56 @@ func TestDelegation_ManyNodes(t *testing.T) {
 
 	// Part 2: send a transaction to the Delegation contract containing a request
 	// to add 1400+ nodes
-	// txData := GetFileContents("../../test/delegation-at-genesis.txt")
-	// parser := parsers.NewCallArgsParser()
-	// callInput := DefaultTestContractCallInput()
-	// callInput.VMInput.CallerAddr = delegation_owner.Address
+	parser := parsers.NewCallArgsParser()
+	txData := txDataLine()
+	fmt.Println("txData length", len(txData))
+	function, arguments, err := parser.ParseData(txData)
+	require.Nil(t, err)
+	fmt.Println("txData argument count", len(arguments))
 
+	callInput := DefaultTestContractCallInput()
+	callInput.VMInput.CallerAddr = delegation_owner.Address
+	callInput.VMInput.Arguments = arguments
+	callInput.RecipientAddr = delegation_contract_address
+	callInput.Function = function
+	callInput.GasProvided = 999_000_000_000
+
+	vmOutput, err = host.RunSmartContractCall(callInput)
+	require.Nil(t, err)
+	require.NotNil(t, vmOutput)
+	fmt.Println(vmOutput.ReturnMessage)
+
+	require.Equal(t, vmcommon.Ok, vmOutput.ReturnCode)
+	storageUpdates := vmOutput.OutputAccounts[string(delegation_contract_address)].StorageUpdates
+	fmt.Println(len(storageUpdates))
+
+	keyTypeCounts := make(map[string]uint)
+
+	for key := range storageUpdates {
+		prefix := resolvePrefix(key)
+		if prefix == "unknown" {
+			fmt.Println(key)
+		}
+		_, ok := keyTypeCounts[prefix]
+		if !ok {
+			keyTypeCounts[prefix] = 0
+		}
+		keyTypeCounts[prefix] += 1
+	}
+
+	for prefix, count := range keyTypeCounts {
+		fmt.Println(prefix, ": ", count)
+	}
+}
+
+var keyPrefixes = []string{"node_id_to_bls", "node_state", "node_signature", "node_bls_to_id", "owner", "num_nodes"}
+
+func resolvePrefix(key string) string {
+	for _, prefix := range keyPrefixes {
+		if strings.HasPrefix(key, prefix) {
+			return prefix
+		}
+	}
+
+	return "unknown"
 }
