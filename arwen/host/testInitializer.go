@@ -25,11 +25,11 @@ var userAddress = []byte("userAccount.....................")
 var parentAddress = []byte("parentSC........................")
 var childAddress = []byte("childSC.........................")
 
-// GetSCCode retrieves the bytecode of a WASM module from a file
-func GetSCCode(fileName string) []byte {
+// GetFileContents retrieves the bytecode of a WASM module from a file
+func GetFileContents(fileName string) []byte {
 	code, err := ioutil.ReadFile(filepath.Clean(fileName))
 	if err != nil {
-		panic(fmt.Sprintf("GetSCCode(): %s", fileName))
+		panic(fmt.Sprintf("GetFileContents(): %s", fileName))
 	}
 
 	return code
@@ -38,7 +38,7 @@ func GetSCCode(fileName string) []byte {
 // GetTestSCCode retrieves the bytecode of a WASM testing module
 func GetTestSCCode(scName string, prefixToTestSCs string) []byte {
 	pathToSC := prefixToTestSCs + "test/contracts/" + scName + "/output/" + scName + ".wasm"
-	return GetSCCode(pathToSC)
+	return GetFileContents(pathToSC)
 }
 
 // DefaultTestArwenForDeployment creates an Arwen vmHost configured for testing deployments
