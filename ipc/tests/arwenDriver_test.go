@@ -145,7 +145,7 @@ func TestDelegation_ManyNodes(t *testing.T) {
 
 	callInput := DefaultTestContractCallInput()
 	callInput.VMInput.CallerAddr = delegation_owner.Address
-	callInput.VMInput.Arguments = arguments[0:258]
+	callInput.VMInput.Arguments = arguments
 	callInput.RecipientAddr = delegation_contract_address
 	callInput.Function = function
 	callInput.GasProvided = 999_000_000_000
