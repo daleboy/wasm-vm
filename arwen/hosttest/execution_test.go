@@ -2955,3 +2955,25 @@ func makeBytecodeWithLocals(numLocals uint64) []byte {
 
 	return result
 }
+
+func TestExecution_Fibonacci(t *testing.T) {
+	// t.Skip("tries to catch a panic, but it does not reproduce")
+	contract := test.CreateInstanceContract(test.ParentAddress).
+		WithCode(test.GetTestSCCode("fib_arwen", "../../"))
+
+	input := test.CreateTestContractCallInputBuilder().
+		WithRecipientAddr(test.ParentAddress).
+		WithFunction("_main").
+		WithGasProvided(100_000_000_000).
+		WithCallValue(40).
+		Build()
+
+	for i := 0; i < 100; i++ {
+		test.BuildInstanceCallTest(t).
+			WithContracts(contract).
+			WithInput(input).
+			AndAssertResults(func(host arwen.VMHost, stubBlockchainHook *contextmock.BlockchainHookStub, verify *test.VMOutputVerifier) {
+				verify.ExecutionFailed()
+			})
+	}
+}

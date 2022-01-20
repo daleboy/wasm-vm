@@ -394,6 +394,11 @@ func (contractInput *ContractCallInputBuilder) WithGasProvided(gas uint64) *Cont
 	return contractInput
 }
 
+func (contractInput *ContractCallInputBuilder) WithCallValue(value int64) *ContractCallInputBuilder {
+	contractInput.ContractCallInput.VMInput.CallValue = big.NewInt(value)
+	return contractInput
+}
+
 // WithFunction provides the function to be called for ContractCallInputBuilder
 func (contractInput *ContractCallInputBuilder) WithFunction(function string) *ContractCallInputBuilder {
 	contractInput.ContractCallInput.Function = function
