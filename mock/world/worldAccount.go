@@ -7,7 +7,7 @@ import (
 
 	"github.com/ElrondNetwork/arwen-wasm-vm/v1_4/crypto/hashing"
 	logger "github.com/ElrondNetwork/elrond-go-logger"
-	"github.com/ElrondNetwork/elrond-vm-common"
+	vmcommon "github.com/ElrondNetwork/elrond-vm-common"
 )
 
 // ErrOperationNotPermitted indicates an operation rejected due to insufficient
@@ -248,12 +248,23 @@ func (a *Account) DirtyData() map[string][]byte {
 
 // Clone -
 func (a *Account) Clone() *Account {
+	balanceDelta := big.NewInt(0)
+	developerReward := big.NewInt(0)
+
+	if a.BalanceDelta != nil {
+		balanceDelta = big.NewInt(0).Set(a.BalanceDelta)
+	}
+
+	if a.DeveloperReward != nil {
+		developerReward = big.NewInt(0).Set(a.DeveloperReward)
+	}
+
 	return &Account{
 		Exists:          a.Exists,
 		Address:         a.Address,
 		Nonce:           a.Nonce,
 		Balance:         big.NewInt(0).Set(a.Balance),
-		BalanceDelta:    big.NewInt(0).Set(a.BalanceDelta),
+		BalanceDelta:    balanceDelta,
 		Storage:         a.cloneStorage(),
 		RootHash:        cloneBytes(a.RootHash),
 		Code:            cloneBytes(a.Code),
@@ -262,7 +273,7 @@ func (a *Account) Clone() *Account {
 		AsyncCallData:   a.AsyncCallData,
 		OwnerAddress:    cloneBytes(a.OwnerAddress),
 		Username:        cloneBytes(a.Username),
-		DeveloperReward: big.NewInt(0).Set(a.DeveloperReward),
+		DeveloperReward: developerReward,
 		ShardID:         a.ShardID,
 		IsSmartContract: a.IsSmartContract,
 		MockWorld:       a.MockWorld,

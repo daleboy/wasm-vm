@@ -1,0 +1,224 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.60.0-nightly",
+            "commitHash": "84322efad553c7a79c80189f2d1b9197c1aa005f",
+            "commitDate": "2022-01-23",
+            "channel": "Nightly",
+            "short": "rustc 1.60.0-nightly (84322efad 2022-01-23)"
+        },
+        "contractCrate": {
+            "name": "multi-transfer-esdt",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "elrond-wasm",
+            "version": "0.27.1"
+        }
+    },
+    "name": "MultiTransferEsdt",
+    "constructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "batchTransferEsdtToken",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "batch_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "transfers",
+                    "type": "variadic<EthTransaction>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getAndClearFirstRefundBatch",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "optional<multi<u64,variadic<multi<u64,u64,bytes,bytes,TokenIdentifier,BigUint>>>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "setMaxTxBatchSize",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_max_tx_batch_size",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setMaxTxBatchBlockDuration",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_max_tx_batch_block_duration",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getCurrentTxBatch",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "optional<multi<u64,variadic<multi<u64,u64,bytes,bytes,TokenIdentifier,BigUint>>>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getFirstBatchAnyStatus",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "optional<multi<u64,variadic<multi<u64,u64,bytes,bytes,TokenIdentifier,BigUint>>>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getBatch",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "batch_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "optional<multi<u64,variadic<multi<u64,u64,bytes,bytes,TokenIdentifier,BigUint>>>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getBatchStatus",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "batch_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BatchStatus"
+                }
+            ]
+        },
+        {
+            "name": "getFirstBatchId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getLastBatchId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        }
+    ],
+    "hasCallback": false,
+    "types": {
+        "BatchStatus": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "AlreadyProcessed",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Empty",
+                    "discriminant": 1
+                },
+                {
+                    "name": "PartiallyFull",
+                    "discriminant": 2,
+                    "fields": [
+                        {
+                            "name": "end_block_nonce",
+                            "type": "u64"
+                        },
+                        {
+                            "name": "tx_ids",
+                            "type": "List<u64>"
+                        }
+                    ]
+                },
+                {
+                    "name": "Full",
+                    "discriminant": 3
+                },
+                {
+                    "name": "WaitingForSignatures",
+                    "discriminant": 4
+                }
+            ]
+        },
+        "EthAddress": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "raw_addr",
+                    "type": "array20<u8>"
+                }
+            ]
+        },
+        "EthTransaction": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "EthAddress"
+                },
+                {
+                    "name": "to",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "tx_nonce",
+                    "type": "u64"
+                }
+            ]
+        }
+    }
+}

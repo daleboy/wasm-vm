@@ -1,0 +1,1034 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.60.0-nightly",
+            "commitHash": "84322efad553c7a79c80189f2d1b9197c1aa005f",
+            "commitDate": "2022-01-23",
+            "channel": "Nightly",
+            "short": "rustc 1.60.0-nightly (84322efad 2022-01-23)"
+        },
+        "contractCrate": {
+            "name": "multisig",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "elrond-wasm",
+            "version": "0.27.1"
+        }
+    },
+    "docs": [
+        "Multi-signature smart contract implementation.",
+        "Acts like a wallet that needs multiple signers for any action performed."
+    ],
+    "name": "Multisig",
+    "constructor": {
+        "inputs": [
+            {
+                "name": "esdt_safe_sc_address",
+                "type": "Address"
+            },
+            {
+                "name": "multi_transfer_sc_address",
+                "type": "Address"
+            },
+            {
+                "name": "required_stake",
+                "type": "BigUint"
+            },
+            {
+                "name": "slash_amount",
+                "type": "BigUint"
+            },
+            {
+                "name": "quorum",
+                "type": "u32"
+            },
+            {
+                "name": "board",
+                "type": "variadic<Address>",
+                "multi_arg": true
+            }
+        ],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "distributeFeesFromChildContracts",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "dest_address_percentage_pairs",
+                    "type": "variadic<multi<Address,u32>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "stake",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "unstake",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "proposeEsdtSafeSetCurrentTransactionBatchStatus",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "esdt_safe_batch_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "tx_batch_status",
+                    "type": "variadic<TransactionStatus>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "proposeMultiTransferEsdtBatch",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "eth_batch_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "transfers",
+                    "type": "variadic<multi<EthAddress,Address,TokenIdentifier,BigUint,u64>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "moveRefundBatchToSafe",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "docs": [
+                "Proposers and board members use this to launch signed actions."
+            ],
+            "name": "performAction",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getCurrentTxBatch",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "optional<multi<u64,variadic<multi<u64,u64,bytes,bytes,TokenIdentifier,BigUint>>>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getCurrentRefundBatch",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "optional<multi<u64,variadic<multi<u64,u64,bytes,bytes,TokenIdentifier,BigUint>>>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Actions are cleared after execution, so an empty entry means the action was executed already",
+                "Returns \"false\" if the action ID is invalid"
+            ],
+            "name": "wasActionExecuted",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "If the mapping was made, it means that the transfer action was proposed in the past",
+                "To check if it was executed as well, use the wasActionExecuted view"
+            ],
+            "name": "wasTransferActionProposed",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "eth_batch_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "transfers",
+                    "type": "variadic<multi<EthAddress,Address,TokenIdentifier,BigUint,u64>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "getActionIdForTransferBatch",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "eth_batch_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "transfers",
+                    "type": "variadic<multi<EthAddress,Address,TokenIdentifier,BigUint,u64>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "wasSetCurrentTransactionBatchStatusActionProposed",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "esdt_safe_batch_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "expected_tx_batch_status",
+                    "type": "variadic<TransactionStatus>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "getActionIdForSetCurrentTransactionBatchStatus",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "esdt_safe_batch_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "expected_tx_batch_status",
+                    "type": "variadic<TransactionStatus>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Used by board members to sign actions."
+            ],
+            "name": "sign",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "upgradeChildContractFromSource",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "child_sc_address",
+                    "type": "Address"
+                },
+                {
+                    "name": "source_address",
+                    "type": "Address"
+                },
+                {
+                    "name": "init_args",
+                    "type": "variadic<bytes>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "pause",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "unpause",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "addBoardMember",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "board_member",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeUser",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "slashBoardMember",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "board_member",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "changeQuorum",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_quorum",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "addMapping",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "erc20_address",
+                    "type": "EthAddress"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "clearMapping",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "erc20_address",
+                    "type": "EthAddress"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "changeFeeEstimatorContractAddress",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "changeElrondToEthGasLimit",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_gas_limit",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "changeDefaultPricePerGasUnit",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "new_value",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "changeTokenTicker",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "new_ticker",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "esdtSafeAddTokenToWhitelist",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "ticker",
+                    "type": "bytes"
+                },
+                {
+                    "name": "opt_default_value_in_dollars",
+                    "type": "optional<BigUint>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "esdtSafeRemoveTokenFromWhitelist",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "esdtSafeSetMaxTxBatchSize",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_max_tx_batch_size",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "esdtSafeSetMaxTxBatchBlockDuration",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_max_tx_batch_block_duration",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "multiTransferEsdtSetMaxRefundTxBatchSize",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_max_tx_batch_size",
+                    "type": "u32"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "multiTransferEsdtSetMaxRefundTxBatchBlockDuration",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_max_tx_batch_block_duration",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "docs": [
+                "Minimum number of signatures needed to perform any action."
+            ],
+            "name": "getQuorum",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Denormalized board member count.",
+                "It is kept in sync with the user list by the contract."
+            ],
+            "name": "getNumBoardMembers",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "The required amount to stake for accepting relayer position"
+            ],
+            "name": "getRequiredStakeAmount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Staked amount by each board member."
+            ],
+            "name": "getAmountStaked",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "board_member_address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Amount of stake slashed if a relayer is misbehaving"
+            ],
+            "name": "getSlashAmount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Total slashed tokens accumulated"
+            ],
+            "name": "getSlashedTokensAmount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "isPaused",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "getLastExecutedEthBatchId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getLastExecutedEthTxId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Mapping between ERC20 Ethereum address and Elrond ESDT Token Identifiers"
+            ],
+            "name": "getErc20AddressForTokenId",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "EthAddress"
+                }
+            ]
+        },
+        {
+            "name": "getTokenIdForErc20Address",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "erc20_address",
+                    "type": "EthAddress"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "getEsdtSafeAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getMultiTransferEsdtAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Returns `true` (`1`) if the user has signed the action.",
+                "Does not check whether or not the user is still a board member and the signature valid."
+            ],
+            "name": "signed",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                },
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Indicates user rights.",
+                "`0` = no rights,",
+                "`1` = can propose, but not sign,",
+                "`2` = can propose and sign."
+            ],
+            "name": "userRole",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "UserRole"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Lists all users that can sign actions."
+            ],
+            "name": "getAllBoardMembers",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<Address>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getAllStakedRelayers",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<Address>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Gets addresses of all users who signed an action and are still board members.",
+                "All these signatures are currently valid."
+            ],
+            "name": "getActionSignerCount",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "It is possible for board members to lose their role.",
+                "They are not automatically removed from all actions when doing so,",
+                "therefore the contract needs to re-check every time when actions are performed.",
+                "This function is used to validate the signers before performing an action.",
+                "It also makes it easy to check before performing an action."
+            ],
+            "name": "getActionValidSignerCount",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Returns `true` (`1`) if `getActionValidSignerCount >= getQuorum`."
+            ],
+            "name": "quorumReached",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "The index of the last proposed action.",
+                "0 means that no action was ever proposed yet."
+            ],
+            "name": "getActionLastIndex",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "docs": [
+                "Serialized action data of an action with index."
+            ],
+            "name": "getActionData",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "action_id",
+                    "type": "u32"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Action"
+                }
+            ]
+        }
+    ],
+    "hasCallback": false,
+    "types": {
+        "Action": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Nothing",
+                    "discriminant": 0
+                },
+                {
+                    "name": "_AddBoardMember",
+                    "discriminant": 1,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "Address"
+                        }
+                    ]
+                },
+                {
+                    "name": "_AddProposer",
+                    "discriminant": 2,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "Address"
+                        }
+                    ]
+                },
+                {
+                    "name": "_RemoveUser",
+                    "discriminant": 3,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "Address"
+                        }
+                    ]
+                },
+                {
+                    "name": "_SlashUser",
+                    "discriminant": 4,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "Address"
+                        }
+                    ]
+                },
+                {
+                    "name": "_ChangeQuorum",
+                    "discriminant": 5,
+                    "fields": [
+                        {
+                            "name": "0",
+                            "type": "u32"
+                        }
+                    ]
+                },
+                {
+                    "name": "SetCurrentTransactionBatchStatus",
+                    "discriminant": 6,
+                    "fields": [
+                        {
+                            "name": "esdt_safe_batch_id",
+                            "type": "u64"
+                        },
+                        {
+                            "name": "tx_batch_status",
+                            "type": "List<TransactionStatus>"
+                        }
+                    ]
+                },
+                {
+                    "name": "BatchTransferEsdtToken",
+                    "discriminant": 7,
+                    "fields": [
+                        {
+                            "name": "eth_batch_id",
+                            "type": "u64"
+                        },
+                        {
+                            "name": "transfers",
+                            "type": "List<EthTransaction>"
+                        }
+                    ]
+                }
+            ]
+        },
+        "EthAddress": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "raw_addr",
+                    "type": "array20<u8>"
+                }
+            ]
+        },
+        "EthTransaction": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "EthAddress"
+                },
+                {
+                    "name": "to",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "tx_nonce",
+                    "type": "u64"
+                }
+            ]
+        },
+        "TransactionStatus": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "None",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Pending",
+                    "discriminant": 1
+                },
+                {
+                    "name": "InProgress",
+                    "discriminant": 2
+                },
+                {
+                    "name": "Executed",
+                    "discriminant": 3
+                },
+                {
+                    "name": "Rejected",
+                    "discriminant": 4
+                }
+            ]
+        },
+        "UserRole": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "None",
+                    "discriminant": 0
+                },
+                {
+                    "name": "_Proposer",
+                    "discriminant": 1
+                },
+                {
+                    "name": "BoardMember",
+                    "discriminant": 2
+                }
+            ]
+        }
+    }
+}

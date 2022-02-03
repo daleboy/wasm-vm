@@ -1,0 +1,83 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.60.0-nightly",
+            "commitHash": "84322efad553c7a79c80189f2d1b9197c1aa005f",
+            "commitDate": "2022-01-23",
+            "channel": "Nightly",
+            "short": "rustc 1.60.0-nightly (84322efad 2022-01-23)"
+        },
+        "contractCrate": {
+            "name": "egld-esdt-swap",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "elrond-wasm",
+            "version": "0.27.1"
+        }
+    },
+    "name": "EgldEsdtSwap",
+    "constructor": {
+        "inputs": [
+            {
+                "name": "wrapped_egld_token_id",
+                "type": "TokenIdentifier"
+            }
+        ],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "wrapEgld",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "accept_funds_endpoint_name",
+                    "type": "optional<bytes>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "unwrapEgld",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "accept_funds_endpoint_name",
+                    "type": "optional<bytes>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getLockedEgldBalance",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "getWrappedEgldTokenId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
+        }
+    ],
+    "hasCallback": false,
+    "types": {}
+}
